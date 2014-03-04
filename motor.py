@@ -32,31 +32,32 @@ def stopMotors ():
     lf.ChangeDutyCycle (0)
     lb.ChangeDutyCycle (0)
 
-def goForward ():
-    rf.ChangeDutyCycle (40)
+# speed ranges over [0..100]
+def goForward (speed):
+    rf.ChangeDutyCycle (speed)
     rb.ChangeDutyCycle (0)
-    lf.ChangeDutyCycle (40)
+    lf.ChangeDutyCycle (speed)
     lb.ChangeDutyCycle (0)
 
-def goBack ():
+def goBack (speed):
     rf.ChangeDutyCycle (0)
-    rb.ChangeDutyCycle (40)
+    rb.ChangeDutyCycle (speed)
     lf.ChangeDutyCycle (0)
-    lb.ChangeDutyCycle (40)
+    lb.ChangeDutyCycle (speed)
 
-def goRight ():
-    rf.ChangeDutyCycle (20)
-    rb.ChangeDutyCycle (0)
-    lf.ChangeDutyCycle (0)
-    lb.ChangeDutyCycle (0)
-
-def goLeft ():
+def goRight (speed):
     rf.ChangeDutyCycle (0)
     rb.ChangeDutyCycle (0)
-    lf.ChangeDutyCycle (20)
+    lf.ChangeDutyCycle (speed)
     lb.ChangeDutyCycle (0)
 
-def stopMotors ():
+def goLeft (speed):
+    rf.ChangeDutyCycle (speed)
+    rb.ChangeDutyCycle (0)
+    lf.ChangeDutyCycle (0)
+    lb.ChangeDutyCycle (0)
+
+def finMotors ():
     rf.stop ()
     rb.stop ()
     lf.stop ()

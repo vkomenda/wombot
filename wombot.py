@@ -1,40 +1,66 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
-from array import array
 from time  import sleep
-import sys
-import struct
 
 import adc
 import motor
 
-DEBUG = True
-READ_DELAY = 0.2
+DEBUG      = True
+READ_DELAY = 0.33
 
-def run ():
-    adcTolerance = 5
-    adcPins = 3
-    adcLast = [0,0,0,0,0,0,0,0]
-    adcIn  = [0,0,0,0,0,0,0,0]
-    adcChanged = [False,False,False,False,False,False,False,False]
+# thresholds between non-white and white for each of the sensors
+thresholdR = 100
+thresholdL = 60
 
+
+def init ():
+    motor.initMotors ()
+
+    initR = adc.readADC (0)
+    initL = adc.readADC (1)
+    return (initR, initL)
+
+
+def run ((initR, initL)):
     while True:
         sleep (READ_DELAY)
 
-        for i in range (adcPins):
-            adcChanged[i] = False
+        # find the current values of the line sensors
+        lineR = adc.readADC (0)
+        lineL = adc.readADC (1)
 
-        updates = []
-        for i in range (adcPins):
-            adcIn[i] = adc.readADC (i)
-            if (abs (adcIn[i] - adcLast[i]) > adcTolerance):
-                adcChanged[i] = True
+        if (DEBUG): print "initR: %d | initL: %d" % (initR, initL)
+        if (DEBUG): print "Right: %d |  Left: %d" % (lineR, lineL)
 
-        if (DEBUG): print "Analogue-to-digital ports: " , adcIn
+        # make choices and change direction if needed
+        if   (initR - lineR > thresholdR): steerRight ()
+        elif (initL - lineL > thresholdL): steerLeft  ()
+        else:                              goForward  ()
 
-        for i in range (adcPins):
-            if (adcChanged[i]): adcLast = adcIn
+
+def steerRight ():
+    if (DEBUG): print "Steer right!"
+    motor.goRight (35)
+
+
+def steerLeft ():
+    if (DEBUG): print "Steer left!"
+    motor.goLeft (35)
+
+
+def goForward ():
+    if (DEBUG): print "Go forward."
+    motor.goForward (40)
+
+
+def close ():
+    motor.finMotors ()
+    adc.closeADC ()
 
 
 if __name__ == '__main__':
-    run ()
+    try:
+        initVals = init ()
+        run (initVals)
+    except KeyboardInterrupt:
+        close ()
