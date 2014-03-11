@@ -6,11 +6,11 @@ import adc
 import motor
 
 DEBUG      = True
-READ_DELAY = 0.33
+READ_DELAY = 0.2
 
 # thresholds between non-white and white for each of the sensors
-thresholdR = 100
-thresholdL = 60
+thresholdR = 150
+thresholdL = 100
 
 
 def init ():
@@ -33,19 +33,19 @@ def run ((initR, initL)):
         if (DEBUG): print "Right: %d |  Left: %d" % (lineR, lineL)
 
         # make choices and change direction if needed
-        if   (initR - lineR > thresholdR): steerRight ()
-        elif (initL - lineL > thresholdL): steerLeft  ()
+        if   (lineR - initR > thresholdR): steerRight ()
+        elif (lineL - initL > thresholdL): steerLeft  ()
         else:                              goForward  ()
 
 
 def steerRight ():
     if (DEBUG): print "Steer right!"
-    motor.goRight (35)
+    motor.goRight (50)
 
 
 def steerLeft ():
     if (DEBUG): print "Steer left!"
-    motor.goLeft (35)
+    motor.goLeft (50)
 
 
 def goForward ():
