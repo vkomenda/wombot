@@ -19,12 +19,20 @@ def closeADC ():
     spi.close ()
 
 
+def high (val):
+    return (val >= 512)
+
+
+def low (val):
+    return (val < 512)
+
+
 if __name__ == "__main__":
     try:
         adc = [0,0,0,0,0,0,0,0]
         while True:
 
-            for i in range (7):
+            for i in range (8):
                 adc[i] = readADC (i)
 
             print "Analogue-to-digital values: ", adc

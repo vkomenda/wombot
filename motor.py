@@ -1,12 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 import RPi.GPIO as GPIO
 from time import sleep
 
-RIGHT_FWD  = 17
-RIGHT_BACK = 22
-LEFT_FWD   = 23
-LEFT_BACK  = 18
+RIGHT_FWD  = 4
+RIGHT_BACK = 18
+LEFT_FWD   = 24
+LEFT_BACK  = 23
 
 GPIO.setmode (GPIO.BCM)
 
