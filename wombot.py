@@ -28,6 +28,14 @@ MODE_WAIT = 1
 MODE_LINE = 2
 MODE_MAZE = 3
 
+DIR_FWD   = 0
+DIR_LEFT  = 1
+DIR_RIGHT = 2
+
+SENSE_NONE  = 0
+SENSE_LEFT  = 1
+SENSE_RIGHT = 2
+SENSE_BOTH  = 3
 
 def init ():
     motor.initMotors ()
@@ -43,12 +51,58 @@ def showMode (mode):
     elif (mode == MODE_MAZE): return "MAZE"
     else:                     return "NONE"
 
+def lineFollowerTransition ((direc, sense)):
+    if   (sense == SENSE_NONE):
+        if   (direc == DIR_FWD):   return DIR_FWD
+        elif (direc == DIR_LEFT):  return DIR_FWD
+        elif (direc == DIR_RIGHT): return DIR_FWD
+        else:                      return DIR_FWD
+    elif (sense == SENSE_LEFT):
+        if   (direc == DIR_FWD):   return DIR_LEFT
+        elif (direc == DIR_LEFT):  return DIR_LEFT
+        elif (direc == DIR_RIGHT): return DIR_LEFT
+        else:                      return DIR_FWD
+    elif (sense == SENSE_RIGHT):
+        if   (direc == DIR_FWD):   return DIR_RIGHT
+        elif (direc == DIR_LEFT):  return DIR_RIGHT
+        elif (direc == DIR_RIGHT): return DIR_RIGHT
+        else:                      return DIR_FWD
+    elif (sense == SENSE_BOTH):
+        if   (direc == DIR_FWD):   return DIR_LEFT
+        elif (direc == DIR_LEFT):  return DIR_RIGHT
+        elif (direc == DIR_RIGHT): return DIR_LEFT
+        else:                      return DIR_FWD
+
+def mazeSolverTransition ((direc, sense)):
+    if   (sense == SENSE_NONE):
+        if   (direc == DIR_FWD):   return DIR_LEFT
+        elif (direc == DIR_LEFT):  return DIR_LEFT
+        elif (direc == DIR_RIGHT): return DIR_LEFT
+        else:                      return DIR_FWD
+    elif (sense == SENSE_LEFT):
+        if   (direc == DIR_FWD):   return DIR_FWD
+        elif (direc == DIR_LEFT):  return DIR_FWD
+        elif (direc == DIR_RIGHT): return DIR_FWD
+        else:                      return DIR_FWD
+    elif (sense == SENSE_RIGHT):
+        if   (direc == DIR_FWD):   return DIR_RIGHT
+        elif (direc == DIR_LEFT):  return DIR_RIGHT
+        elif (direc == DIR_RIGHT): return DIR_LEFT
+        else:                      return DIR_FWD
+    elif (sense == SENSE_BOTH):
+        if   (direc == DIR_FWD):   return DIR_RIGHT
+        elif (direc == DIR_LEFT):  return DIR_RIGHT
+        elif (direc == DIR_RIGHT): return DIR_RIGHT
+        else:                      return DIR_FWD
+
 def run ((initR, initL)):
     mode = MODE_INIT
     reset = False
     resetR = initR
     resetL = initL
     ticks = 0
+    sense = SENSE_NONE
+    direc = DIR_FWD
 
     while True:
         led.tick (ticks, mode)
@@ -70,7 +124,7 @@ def run ((initR, initL)):
             mode = MODE_LINE
             reset = True
         elif (adc.high (switchL) == True and mode != MODE_MAZE):
-            mode = MODE_MAZE 
+            mode = MODE_MAZE
             reset = True
         elif (adc.low (switchR) == True and adc.low (switchL) == True and
               mode != MODE_WAIT):
@@ -99,12 +153,23 @@ def run ((initR, initL)):
 
         if (mode == MODE_WAIT and reset == True):
             motor.stopMotors ()
-        
-        if (reset == False and mode == MODE_LINE):
-            # make choices and change direction if needed
-            if   (lineR - resetR > thresholdR): steerRight ()
-            elif (lineL - resetL > thresholdL): steerLeft  ()
-            else:                               goForward  ()
+
+        if (reset == False):
+            sense = SENSE_NONE
+            if (lineR - resetR > thresholdR): sense |= SENSE_RIGHT
+            if (lineL - resetL > thresholdL): sense |= SENSE_LEFT
+
+            if (mode == MODE_LINE):
+                direc = lineFollowerTransition((direc, sense))
+                if   (direc == DIR_RIGHT): steerRight ()
+                elif (direc == DIR_LEFT):  steerLeft  ()
+                else:                      goForward  ()
+
+            else if (mode == NODE_MAZE):
+                direc = mazeSolverTransition((direc, sense))
+                if   (direc == DIR_RIGHT): giveInRight ()
+                elif (direc == DIR_LEFT):  swayLeft    ()
+                else:                      goForward   ()
 
         reset = False
 
@@ -123,6 +188,19 @@ def goForward ():
     if (DEBUG): print "Go forward."
     motor.goForward (50)
 
+def swayLeft ():
+    if (DEBUG): print "Sway left."
+    motor.rf.ChangeDutyCycle (50)
+    motor.rb.ChangeDutyCycle (0)
+    motor.lf.ChangeDutyCycle (20)
+    motor.lb.ChangeDutyCycle (0)
+
+def giveInRight ():
+    if (DEBUG): print "Give in right."
+    motor.rf.ChangeDutyCycle (0)
+    motor.rb.ChangeDutyCycle (0)
+    motor.lf.ChangeDutyCycle (30)
+    motor.lb.ChangeDutyCycle (0)
 
 def close ():
     motor.finMotors ()
