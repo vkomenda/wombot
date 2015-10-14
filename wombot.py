@@ -159,13 +159,13 @@ def run ((initR, initL)):
             if (lineR - resetR > thresholdR): sense |= SENSE_RIGHT
             if (lineL - resetL > thresholdL): sense |= SENSE_LEFT
 
-            if (mode == MODE_LINE):
+            if   (mode == MODE_LINE):
                 direc = lineFollowerTransition((direc, sense))
                 if   (direc == DIR_RIGHT): steerRight ()
                 elif (direc == DIR_LEFT):  steerLeft  ()
                 else:                      goForward  ()
 
-            else if (mode == NODE_MAZE):
+            elif (mode == MODE_MAZE):
                 direc = mazeSolverTransition((direc, sense))
                 if   (direc == DIR_RIGHT): giveInRight ()
                 elif (direc == DIR_LEFT):  swayLeft    ()
@@ -176,30 +176,30 @@ def run ((initR, initL)):
 
 def steerRight ():
     if (DEBUG): print "Steer right!"
-    motor.goRight (50)
+    motor.goRight (80)
 
 
 def steerLeft ():
     if (DEBUG): print "Steer left!"
-    motor.goLeft (50)
+    motor.goLeft (80)
 
 
 def goForward ():
     if (DEBUG): print "Go forward."
-    motor.goForward (50)
+    motor.goForward (80)
 
 def swayLeft ():
     if (DEBUG): print "Sway left."
-    motor.rf.ChangeDutyCycle (50)
+    motor.rf.ChangeDutyCycle (70)
     motor.rb.ChangeDutyCycle (0)
-    motor.lf.ChangeDutyCycle (20)
+    motor.lf.ChangeDutyCycle (40)
     motor.lb.ChangeDutyCycle (0)
 
 def giveInRight ():
     if (DEBUG): print "Give in right."
     motor.rf.ChangeDutyCycle (0)
-    motor.rb.ChangeDutyCycle (0)
-    motor.lf.ChangeDutyCycle (30)
+    motor.rb.ChangeDutyCycle (70)
+    motor.lf.ChangeDutyCycle (0)
     motor.lb.ChangeDutyCycle (0)
 
 def close ():
